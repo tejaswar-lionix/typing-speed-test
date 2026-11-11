@@ -36,3 +36,13 @@ def evaluate(typed, expected):
         "accuracy": accuracy(correct, total),
         "exact_match": typed == expected,
     }
+
+
+def pick_text(level="easy", rng=None):
+    """Pick a sample text for the given difficulty level."""
+    import random
+
+    if level not in SAMPLE_TEXTS:
+        raise ValueError("level must be easy, medium, or hard")
+    rng = rng or random.Random()
+    return rng.choice(SAMPLE_TEXTS[level])
