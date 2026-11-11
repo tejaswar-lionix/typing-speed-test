@@ -30,5 +30,23 @@ class TypingTests(unittest.TestCase):
         self.assertTrue(evaluate("hello", "hello")["exact_match"])
 
 
+class PickTextTests(unittest.TestCase):
+    def test_pick_text_is_deterministic(self):
+        import random
+
+        from typing_test import SAMPLE_TEXTS, pick_text
+
+        first = pick_text("easy", random.Random(3))
+        second = pick_text("easy", random.Random(3))
+        self.assertEqual(first, second)
+        self.assertIn(first, SAMPLE_TEXTS["easy"])
+
+    def test_pick_text_rejects_unknown_level(self):
+        from typing_test import pick_text
+
+        with self.assertRaises(ValueError):
+            pick_text("impossible")
+
+
 if __name__ == "__main__":
     unittest.main()
