@@ -139,5 +139,41 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual(history(self.path), [])
 
 
+class AverageWpmTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.directory.name, "history.csv")
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_average_all_rows(self):
+        from typing_test import average_wpm, log_result
+
+        log_result(self.path, "easy", 40, 98)
+        log_result(self.path, "medium", 60, 97)
+        log_result(self.path, "easy", 50, 99)
+        self.assertEqual(average_wpm(self.path), 50.0)
+
+    def test_average_filtered_by_level(self):
+        from typing_test import average_wpm, log_result
+
+        log_result(self.path, "easy", 40, 98)
+        log_result(self.path, "medium", 60, 97)
+        log_result(self.path, "easy", 55, 99)
+        self.assertEqual(average_wpm(self.path, "easy"), 47.5)
+
+    def test_missing_file_returns_zero(self):
+        from typing_test import average_wpm
+
+        self.assertEqual(average_wpm(self.path), 0.0)
+
+    def test_unknown_level_returns_zero(self):
+        from typing_test import average_wpm, log_result
+
+        log_result(self.path, "easy", 40, 98)
+        self.assertEqual(average_wpm(self.path, "hard"), 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()
