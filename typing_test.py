@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """Measure typing speed and accuracy."""
+import json
+import os
+
 SAMPLE_TEXTS = {
     "easy": ["the quick brown fox jumps over the lazy dog"],
     "medium": ["practice every day and your typing speed will improve steadily"],
@@ -46,3 +49,24 @@ def pick_text(level="easy", rng=None):
         raise ValueError("level must be easy, medium, or hard")
     rng = rng or random.Random()
     return rng.choice(SAMPLE_TEXTS[level])
+
+
+def load_bests(path):
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def record_best(path, level, wpm):
+    """Record a personal best for a level and return the stored best."""
+    if level not in SAMPLE_TEXTS:
+        raise ValueError("level must be easy, medium, or hard")
+    if wpm < 0:
+        raise ValueError("wpm must not be negative")
+    bests = load_bests(path)
+    if level not in bests or wpm > bests[level]:
+        bests[level] = wpm
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(bests, handle, indent=2)
+    return bests[level]
