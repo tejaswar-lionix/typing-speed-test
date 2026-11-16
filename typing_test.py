@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Measure typing speed and accuracy."""
+import csv
 import json
 import os
+from datetime import date
 
 SAMPLE_TEXTS = {
     "easy": ["the quick brown fox jumps over the lazy dog"],
@@ -10,6 +12,7 @@ SAMPLE_TEXTS = {
         "consistent deliberate practice with immediate feedback compounds into durable skill"
     ],
 }
+HISTORY_HEADERS = ["date", "level", "wpm", "accuracy"]
 
 
 def words_per_minute(characters, seconds):
@@ -70,3 +73,37 @@ def record_best(path, level, wpm):
         with open(path, "w", encoding="utf-8") as handle:
             json.dump(bests, handle, indent=2)
     return bests[level]
+
+
+def log_result(path, level, wpm, accuracy, day=None):
+    """Append a session result to a CSV history log."""
+    if level not in SAMPLE_TEXTS:
+        raise ValueError("level must be easy, medium, or hard")
+    if wpm < 0:
+        raise ValueError("wpm must not be negative")
+    if not 0 <= accuracy <= 100:
+        raise ValueError("accuracy must be between 0 and 100")
+    row = [day or date.today().isoformat(), level, wpm, accuracy]
+    needs_header = not os.path.exists(path) or os.path.getsize(path) == 0
+    with open(path, "a", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        if needs_header:
+            writer.writerow(HISTORY_HEADERS)
+        writer.writerow(row)
+    return row
+
+
+def history(path):
+    """Return recorded session results as a list of dictionaries."""
+    if not os.path.exists(path):
+        return []
+    with open(path, newline="", encoding="utf-8") as handle:
+        return [
+            {
+                "date": row["date"],
+                "level": row["level"],
+                "wpm": float(row["wpm"]),
+                "accuracy": float(row["accuracy"]),
+            }
+            for row in csv.DictReader(handle)
+        ]
