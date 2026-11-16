@@ -96,5 +96,48 @@ class BestTests(unittest.TestCase):
             record_best(self.path, "easy", -1)
 
 
+class HistoryTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.directory.name, "history.csv")
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_roundtrip(self):
+        from typing_test import history, log_result
+
+        log_result(self.path, "easy", 42.5, 98.0, day="2026-01-02")
+        self.assertEqual(
+            history(self.path),
+            [{"date": "2026-01-02", "level": "easy", "wpm": 42.5, "accuracy": 98.0}],
+        )
+
+    def test_defaults_to_today(self):
+        from datetime import date
+
+        from typing_test import history, log_result
+
+        log_result(self.path, "medium", 30, 99)
+        self.assertEqual(history(self.path)[0]["date"], date.today().isoformat())
+
+    def test_validation_errors(self):
+        from typing_test import log_result
+
+        with self.assertRaises(ValueError):
+            log_result(self.path, "impossible", 30, 99)
+        with self.assertRaises(ValueError):
+            log_result(self.path, "easy", -1, 99)
+        with self.assertRaises(ValueError):
+            log_result(self.path, "easy", 30, -1)
+        with self.assertRaises(ValueError):
+            log_result(self.path, "easy", 30, 101)
+
+    def test_missing_file_returns_empty(self):
+        from typing_test import history
+
+        self.assertEqual(history(self.path), [])
+
+
 if __name__ == "__main__":
     unittest.main()
