@@ -1,3 +1,5 @@
+import os
+import tempfile
 import unittest
 
 from typing_test import accuracy, evaluate, words_per_minute
@@ -46,6 +48,52 @@ class PickTextTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             pick_text("impossible")
+
+
+class BestTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.directory.name, "bests.json")
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_missing_file_returns_empty(self):
+        from typing_test import load_bests
+
+        self.assertEqual(load_bests(self.path), {})
+
+    def test_first_score_is_stored(self):
+        from typing_test import load_bests, record_best
+
+        self.assertEqual(record_best(self.path, "easy", 42), 42)
+        self.assertEqual(load_bests(self.path), {"easy": 42})
+
+    def test_lower_score_does_not_replace(self):
+        from typing_test import load_bests, record_best
+
+        record_best(self.path, "easy", 50)
+        self.assertEqual(record_best(self.path, "easy", 40), 50)
+        self.assertEqual(load_bests(self.path), {"easy": 50})
+
+    def test_higher_score_replaces(self):
+        from typing_test import load_bests, record_best
+
+        record_best(self.path, "easy", 50)
+        self.assertEqual(record_best(self.path, "easy", 60), 60)
+        self.assertEqual(load_bests(self.path), {"easy": 60})
+
+    def test_unknown_level_raises(self):
+        from typing_test import record_best
+
+        with self.assertRaises(ValueError):
+            record_best(self.path, "impossible", 50)
+
+    def test_negative_wpm_raises(self):
+        from typing_test import record_best
+
+        with self.assertRaises(ValueError):
+            record_best(self.path, "easy", -1)
 
 
 if __name__ == "__main__":
