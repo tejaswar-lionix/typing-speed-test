@@ -107,3 +107,13 @@ def history(path):
             }
             for row in csv.DictReader(handle)
         ]
+
+
+def average_wpm(path, level=None):
+    """Return the mean words-per-minute from the history log."""
+    rows = history(path)
+    if level is not None:
+        rows = [row for row in rows if row["level"] == level]
+    if not rows:
+        return 0.0
+    return round(sum(row["wpm"] for row in rows) / len(rows), 1)
