@@ -125,3 +125,13 @@ def average_wpm(path, level=None):
     if not rows:
         return 0.0
     return round(sum(row["wpm"] for row in rows) / len(rows), 1)
+
+
+def best_wpm(path):
+    """Return the best recorded WPM per level from the history log."""
+    bests = {}
+    for row in history(path):
+        level = row["level"]
+        if level not in bests or row["wpm"] > bests[level]:
+            bests[level] = row["wpm"]
+    return bests
