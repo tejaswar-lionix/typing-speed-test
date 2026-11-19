@@ -139,6 +139,28 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual(history(self.path), [])
 
 
+class ClearHistoryTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.directory.name, "history.csv")
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_removes_existing_file(self):
+        from typing_test import clear_history
+
+        with open(self.path, "w", encoding="utf-8") as handle:
+            handle.write("date,level,wpm,accuracy\n")
+        self.assertTrue(clear_history(self.path))
+        self.assertFalse(os.path.exists(self.path))
+
+    def test_missing_file_returns_false(self):
+        from typing_test import clear_history
+
+        self.assertFalse(clear_history(self.path))
+
+
 class AverageWpmTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
