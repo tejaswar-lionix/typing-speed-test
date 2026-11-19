@@ -28,6 +28,10 @@ python3 -c "from typing_test import clear_history; print(clear_history('history.
 python3 -m unittest -q
 ```
 
+## Additional API
+
+- `best_wpm(path)` returns the best recorded WPM per level from the history log.
+
 ## License
 
 MIT

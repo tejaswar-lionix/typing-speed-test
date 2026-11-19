@@ -197,5 +197,29 @@ class AverageWpmTests(unittest.TestCase):
         self.assertEqual(average_wpm(self.path, "hard"), 0.0)
 
 
+class BestWpmTests(unittest.TestCase):
+    def test_best_per_level(self):
+        import os
+        import tempfile
+
+        from typing_test import best_wpm, log_result
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "history.csv")
+            log_result(path, "easy", 40.0, 95.0)
+            log_result(path, "easy", 55.5, 97.0)
+            log_result(path, "hard", 30.0, 90.0)
+            self.assertEqual(best_wpm(path), {"easy": 55.5, "hard": 30.0})
+
+    def test_missing_history(self):
+        import os
+        import tempfile
+
+        from typing_test import best_wpm
+
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertEqual(best_wpm(os.path.join(directory, "none.csv")), {})
+
+
 if __name__ == "__main__":
     unittest.main()
