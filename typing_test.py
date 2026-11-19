@@ -109,6 +109,14 @@ def history(path):
         ]
 
 
+def clear_history(path):
+    """Remove the history file, returning True when it was deleted."""
+    if not os.path.exists(path):
+        return False
+    os.remove(path)
+    return True
+
+
 def average_wpm(path, level=None):
     """Return the mean words-per-minute from the history log."""
     rows = history(path)
